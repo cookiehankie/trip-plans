@@ -1,0 +1,22 @@
+{
+  "name": "感恩节，去死亡谷｜2026 洛杉矶与死亡谷自驾计划",
+  "short_name": "LA·死亡谷26",
+  "description": "2026 感恩节 3 人行程：2 位朋友从纽约飞 LAX（DL0738），我从 San Jose 开 Cybertruck 南下汇合，5 天走完洛杉矶 GTA 5 景点、KOJIMA 割烹与死亡谷大环线。",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7f4ec",
+  "theme_color": "#122437",
+  "icons": [
+    {
+      "src": "../../template/vendor/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "../../template/vendor/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
