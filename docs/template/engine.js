@@ -330,7 +330,6 @@
 
         <div class="container map-shell">
           <div id="trip-map" role="img" aria-label="${esc(mapCfg.ariaLabel || '行程路线地图')}"></div>
-          <div class="map-name-layer" id="map-name-layer"></div>
           <div class="map-overlay">
             <div class="map-overlay-title" id="map-plan-name"></div>
             <div><span class="legend-dot orange"></span> ${esc(mapCfg.stopLegendLabel || '当前停留 / 观景点')}</div>
@@ -515,10 +514,7 @@
   let leafletMap = null;
   let routeLayerGroup = null;
   let activeMapKey = defaultPlanKey;
-  const nameLayer = document.getElementById('map-name-layer');
-  let nameStage = null;
-  let labelAnchorLatLng = null;
-  let labelAnchorPoint = null;
+  let labelsPane = null;
   let isMapZooming = false;
 
   function initLeafletMap() {
@@ -571,22 +567,18 @@
 
     routeLayerGroup = window.L.layerGroup().addTo(leafletMap);
 
+    labelsPane = leafletMap.createPane('tripLabelsPane');
+    labelsPane.style.zIndex = '650';
+    labelsPane.style.pointerEvents = 'none';
+
     leafletMap.on('zoomstart', () => {
       isMapZooming = true;
-      if (nameLayer) nameLayer.classList.add('is-zooming');
-    });
-
-    leafletMap.on('move', () => {
-      if (isMapZooming || !nameStage || !labelAnchorLatLng || !labelAnchorPoint) return;
-      const cur = leafletMap.latLngToContainerPoint(labelAnchorLatLng);
-      const dx = cur.x - labelAnchorPoint.x;
-      const dy = cur.y - labelAnchorPoint.y;
-      nameStage.style.transform = `translate3d(${dx}px, ${dy}px, 0)`;
+      if (labelsPane) labelsPane.classList.add('is-zooming');
     });
 
     leafletMap.on('moveend zoomend resize', () => {
       isMapZooming = false;
-      if (nameLayer) nameLayer.classList.remove('is-zooming');
+      if (labelsPane) labelsPane.classList.remove('is-zooming');
       renderMapLabels(activeMapKey);
     });
 
@@ -618,19 +610,21 @@
   }
 
   function renderMapLabels(key) {
-    if (!leafletMap || !nameLayer || isMapZooming) return;
+    if (!leafletMap || !labelsPane || isMapZooming) return;
     const size = leafletMap.getSize();
     const width = size.x || 0;
     const height = size.y || 0;
     if (!width || !height) return;
 
-    nameLayer.innerHTML = '';
+    labelsPane.innerHTML = '';
+    const origin = leafletMap.containerPointToLayerPoint([0, 0]);
     const stage = document.createElement('div');
     stage.className = 'map-name-stage';
-    nameLayer.append(stage);
-    nameStage = stage;
-    labelAnchorLatLng = leafletMap.getCenter();
-    labelAnchorPoint = leafletMap.latLngToContainerPoint(labelAnchorLatLng);
+    stage.style.left = `${origin.x}px`;
+    stage.style.top = `${origin.y}px`;
+    stage.style.width = `${width}px`;
+    stage.style.height = `${height}px`;
+    labelsPane.append(stage);
 
     const lineSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     lineSvg.setAttribute('class', 'map-name-lines');
@@ -639,7 +633,7 @@
 
     const placed = [];
     const legend = document.querySelector('.map-overlay');
-    if (legend) {
+    if (legend && legend.offsetWidth > 0 && legend.offsetHeight > 0) {
       placed.push({ x: -4, y: -4, w: legend.offsetWidth + 26, h: legend.offsetHeight + 26 });
     }
 
@@ -1527,7 +1521,9 @@
 
   if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js').catch(() => {});
+      navigator.serviceWorker.register('./sw.js').then(reg => {
+        reg.update().catch(() => {});
+      }).catch(() => {});
     });
   }
 })();

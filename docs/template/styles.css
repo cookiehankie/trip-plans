@@ -416,13 +416,14 @@ h1 em, h2 em { font-style: normal; color: #e49b78; }
 .map-zoom-controls button:last-child { border-bottom: 0; font-size: 12px; }
 .map-zoom-controls button:hover { background: #183346; color: #fff; }
 
-.map-name-layer { position: absolute; inset: 0; z-index: 650; pointer-events: none; overflow: hidden; transition: opacity .12s ease; }
-.map-name-layer.is-zooming { opacity: 0; }
-.map-name-stage { position: absolute; inset: 0; will-change: transform; }
-.map-name-lines { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.leaflet-tripLabels-pane { pointer-events: none; transition: opacity .1s ease; }
+.leaflet-tripLabels-pane.is-zooming { opacity: 0; }
+.map-name-stage { position: absolute; pointer-events: none; overflow: visible; }
+.leaflet-map-pane .map-name-lines { position: absolute; left: 0; top: 0; width: 100%; height: 100%; overflow: visible; z-index: 1; }
 .map-name-lines line { stroke: #8a5a43; stroke-width: 1.1; opacity: .72; }
 .map-name-label {
   position: absolute;
+  z-index: 2;
   display: block;
   width: max-content;
   max-width: 195px;
@@ -434,6 +435,8 @@ h1 em, h2 em { font-style: normal; color: #e49b78; }
   color: #19394b;
   font: 700 10px/1.25 system-ui, 'Noto Sans SC', sans-serif;
   white-space: nowrap;
+  user-select: none;
+  -webkit-user-select: none;
 }
 .map-name-label.is-charger { border-color: #7eb0c6; color: #194d66; }
 .map-name-label.is-crowded { background: #fff4dd; }

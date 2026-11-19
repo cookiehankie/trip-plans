@@ -109,10 +109,11 @@ function loadTripData(slug, tripDir) {
   return data;
 }
 
-function generateTripHtml(trip) {
+function generateTripHtml(trip, cacheHash) {
   const m = trip.meta;
   const themeColor = m.themeColor || '#122437';
   const shortTitle = m.shortTitle || m.title || trip.slug;
+  const v = cacheHash ? `?v=${encodeURIComponent(cacheHash)}` : '';
   return `<!doctype html>
 <html lang="zh-CN">
 <head>
@@ -129,13 +130,13 @@ function generateTripHtml(trip) {
   <link rel="icon" href="../../template/vendor/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="../../template/vendor/icon-192.png">
   <link rel="stylesheet" href="../../template/vendor/leaflet/leaflet.css">
-  <link rel="stylesheet" href="../../template/styles.css">
+  <link rel="stylesheet" href="../../template/styles.css${v}">
 </head>
 <body>
   <div id="trip-root"></div>
   <script src="../../template/vendor/leaflet/leaflet.js"></script>
-  <script src="./data.js"></script>
-  <script src="../../template/engine.js"></script>
+  <script src="./data.js${v}"></script>
+  <script src="../../template/engine.js${v}"></script>
 </body>
 </html>
 `;
@@ -161,13 +162,14 @@ function generateManifest(trip) {
 
 function generateServiceWorker(trip, assetFiles, cacheHash) {
   const cacheName = `trip-${trip.slug}-${cacheHash}`;
+  const v = cacheHash ? `?v=${encodeURIComponent(cacheHash)}` : '';
   const precache = [
     './',
     './index.html',
-    './data.js',
+    `./data.js${v}`,
     './manifest.webmanifest',
-    '../../template/styles.css',
-    '../../template/engine.js',
+    `../../template/styles.css${v}`,
+    `../../template/engine.js${v}`,
     '../../template/vendor/leaflet/leaflet.css',
     '../../template/vendor/leaflet/leaflet.js',
     '../../template/vendor/icon.svg',
@@ -345,7 +347,7 @@ function main() {
       .digest('hex')
       .slice(0, 8);
 
-    fs.writeFileSync(path.join(dstTripDir, 'index.html'), generateTripHtml(data), 'utf8');
+    fs.writeFileSync(path.join(dstTripDir, 'index.html'), generateTripHtml(data, hash), 'utf8');
     fs.writeFileSync(path.join(dstTripDir, 'manifest.webmanifest'), generateManifest(data), 'utf8');
     fs.writeFileSync(path.join(dstTripDir, 'sw.js'), generateServiceWorker(data, assetFiles, hash), 'utf8');
 

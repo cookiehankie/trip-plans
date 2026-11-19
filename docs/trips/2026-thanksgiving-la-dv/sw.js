@@ -1,11 +1,11 @@
-const CACHE_NAME = "trip-2026-thanksgiving-la-dv-42f65e7f";
+const CACHE_NAME = "trip-2026-thanksgiving-la-dv-bd087c0e";
 const PRECACHE_URLS = [
   "./",
   "./index.html",
-  "./data.js",
+  "./data.js?v=bd087c0e",
   "./manifest.webmanifest",
-  "../../template/styles.css",
-  "../../template/engine.js",
+  "../../template/styles.css?v=bd087c0e",
+  "../../template/engine.js?v=bd087c0e",
   "../../template/vendor/leaflet/leaflet.css",
   "../../template/vendor/leaflet/leaflet.js",
   "../../template/vendor/icon.svg",
