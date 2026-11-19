@@ -118,6 +118,7 @@ function generateTripHtml(trip) {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta name="theme-color" content="${esc(themeColor)}">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -196,7 +197,11 @@ self.addEventListener('fetch', event => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) {
-    // Network-first for map tiles, fallback to cache if visited before
+    // Let browser handle cross-origin map tiles natively (preserves Referer & HTTP cache)
+    return;
+  }
+  const isCodeOrDoc = req.mode === 'navigate' || /\\.(html|js|css|webmanifest)$/i.test(url.pathname) || url.pathname.endsWith('/');
+  if (isCodeOrDoc) {
     event.respondWith(
       fetch(req).then(res => {
         if (res && res.ok) {

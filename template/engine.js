@@ -530,11 +530,40 @@
       scrollWheelZoom: false
     });
 
-    window.L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-      subdomains: 'abcd',
+    const osmLayerOpts = {
+      maxZoom: 19,
+      referrerPolicy: 'strict-origin-when-cross-origin',
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    };
+    const fallbackUrl = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}';
+    const fallbackOpts = {
       maxZoom: 18,
-      attribution: '&copy; OpenStreetMap &copy; CARTO'
-    }).addTo(leafletMap);
+      attribution: 'Tiles &copy; Esri, OpenStreetMap contributors'
+    };
+
+    const customTileUrl = mapCfg.tileUrl;
+    const useFallbackDirectly = !customTileUrl && location.protocol === 'file:';
+    const primaryUrl = customTileUrl || (useFallbackDirectly ? fallbackUrl : 'https://tile.openstreetmap.org/{z}/{x}/{y}.png');
+    const primaryOpts = customTileUrl
+      ? { maxZoom: mapCfg.tileMaxZoom || 19, referrerPolicy: 'strict-origin-when-cross-origin', attribution: mapCfg.tileAttribution || osmLayerOpts.attribution }
+      : (useFallbackDirectly ? fallbackOpts : osmLayerOpts);
+
+    const primaryLayer = window.L.tileLayer(primaryUrl, primaryOpts).addTo(leafletMap);
+
+    if (!customTileUrl && !useFallbackDirectly) {
+      let tileLoaded = false;
+      let tileErrors = 0;
+      let switchedFallback = false;
+      primaryLayer.on('tileload', () => { tileLoaded = true; });
+      primaryLayer.on('tileerror', () => {
+        tileErrors += 1;
+        if (!tileLoaded && !switchedFallback && tileErrors >= 3) {
+          switchedFallback = true;
+          leafletMap.removeLayer(primaryLayer);
+          window.L.tileLayer(fallbackUrl, fallbackOpts).addTo(leafletMap);
+        }
+      });
+    }
 
     routeLayerGroup = window.L.layerGroup().addTo(leafletMap);
 

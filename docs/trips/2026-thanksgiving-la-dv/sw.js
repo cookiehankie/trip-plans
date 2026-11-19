@@ -1,4 +1,4 @@
-const CACHE_NAME = "trip-2026-thanksgiving-la-dv-727862d2";
+const CACHE_NAME = "trip-2026-thanksgiving-la-dv-aeaf14fb";
 const PRECACHE_URLS = [
   "./",
   "./index.html",
@@ -41,7 +41,11 @@ self.addEventListener('fetch', event => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) {
-    // Network-first for map tiles, fallback to cache if visited before
+    // Let browser handle cross-origin map tiles natively (preserves Referer & HTTP cache)
+    return;
+  }
+  const isCodeOrDoc = req.mode === 'navigate' || /\.(html|js|css|webmanifest)$/i.test(url.pathname) || url.pathname.endsWith('/');
+  if (isCodeOrDoc) {
     event.respondWith(
       fetch(req).then(res => {
         if (res && res.ok) {
