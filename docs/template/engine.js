@@ -516,6 +516,10 @@
   let routeLayerGroup = null;
   let activeMapKey = defaultPlanKey;
   const nameLayer = document.getElementById('map-name-layer');
+  let nameStage = null;
+  let labelAnchorLatLng = null;
+  let labelAnchorPoint = null;
+  let isMapZooming = false;
 
   function initLeafletMap() {
     const mapContainer = document.getElementById('trip-map');
@@ -567,7 +571,22 @@
 
     routeLayerGroup = window.L.layerGroup().addTo(leafletMap);
 
+    leafletMap.on('zoomstart', () => {
+      isMapZooming = true;
+      if (nameLayer) nameLayer.classList.add('is-zooming');
+    });
+
+    leafletMap.on('move', () => {
+      if (isMapZooming || !nameStage || !labelAnchorLatLng || !labelAnchorPoint) return;
+      const cur = leafletMap.latLngToContainerPoint(labelAnchorLatLng);
+      const dx = cur.x - labelAnchorPoint.x;
+      const dy = cur.y - labelAnchorPoint.y;
+      nameStage.style.transform = `translate3d(${dx}px, ${dy}px, 0)`;
+    });
+
     leafletMap.on('moveend zoomend resize', () => {
+      isMapZooming = false;
+      if (nameLayer) nameLayer.classList.remove('is-zooming');
       renderMapLabels(activeMapKey);
     });
 
@@ -599,17 +618,24 @@
   }
 
   function renderMapLabels(key) {
-    if (!leafletMap || !nameLayer) return;
+    if (!leafletMap || !nameLayer || isMapZooming) return;
     const size = leafletMap.getSize();
     const width = size.x || 0;
     const height = size.y || 0;
     if (!width || !height) return;
 
     nameLayer.innerHTML = '';
+    const stage = document.createElement('div');
+    stage.className = 'map-name-stage';
+    nameLayer.append(stage);
+    nameStage = stage;
+    labelAnchorLatLng = leafletMap.getCenter();
+    labelAnchorPoint = leafletMap.latLngToContainerPoint(labelAnchorLatLng);
+
     const lineSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     lineSvg.setAttribute('class', 'map-name-lines');
     lineSvg.setAttribute('viewBox', `0 0 ${width} ${height}`);
-    nameLayer.append(lineSvg);
+    stage.append(lineSvg);
 
     const placed = [];
     const legend = document.querySelector('.map-overlay');
@@ -631,7 +657,7 @@
       const label = document.createElement('span');
       label.className = 'map-name-label' + (hubNodes.has(name) ? ' is-charger' : '');
       label.textContent = shortNames[name] || name;
-      nameLayer.append(label);
+      stage.append(label);
       const w = label.offsetWidth;
       const h = label.offsetHeight;
       const shifts = [0];

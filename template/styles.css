@@ -416,7 +416,9 @@ h1 em, h2 em { font-style: normal; color: #e49b78; }
 .map-zoom-controls button:last-child { border-bottom: 0; font-size: 12px; }
 .map-zoom-controls button:hover { background: #183346; color: #fff; }
 
-.map-name-layer { position: absolute; inset: 0; z-index: 650; pointer-events: none; overflow: hidden; }
+.map-name-layer { position: absolute; inset: 0; z-index: 650; pointer-events: none; overflow: hidden; transition: opacity .12s ease; }
+.map-name-layer.is-zooming { opacity: 0; }
+.map-name-stage { position: absolute; inset: 0; will-change: transform; }
 .map-name-lines { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 .map-name-lines line { stroke: #8a5a43; stroke-width: 1.1; opacity: .72; }
 .map-name-label {

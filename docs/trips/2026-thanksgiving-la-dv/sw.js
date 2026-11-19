@@ -1,4 +1,4 @@
-const CACHE_NAME = "trip-2026-thanksgiving-la-dv-aeaf14fb";
+const CACHE_NAME = "trip-2026-thanksgiving-la-dv-42f65e7f";
 const PRECACHE_URLS = [
   "./",
   "./index.html",
